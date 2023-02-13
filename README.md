@@ -7,3 +7,5 @@ are also given in the code. This directory must be a real location and must cont
 program to not crash.
 
 The only user-provided requirements (at the moment) are boost and the boost filesystem-vc143.
+
+This project has been forked and modified from the original at: https://github.com/dharani811/bmfontgl
