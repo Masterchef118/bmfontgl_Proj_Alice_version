@@ -287,7 +287,7 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile
 	Stream.close();
 
 	rgba8_image_t img;
-	//Change to name of .tga file.
+
 	read_and_convert_image(tgafile, img, targa_tag());
 
 	storage.reserve(img.width() * img.height() * num_channels<rgba8_image_t>());
