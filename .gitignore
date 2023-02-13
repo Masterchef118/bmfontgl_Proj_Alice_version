@@ -1,0 +1,21 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/glfont/v17/Browse.VC.db-shm
+/.vs/glfont/v17/Browse.VC.db-wal
+/.vs/glfont/v17/Browse.VC.opendb
+/UpgradeLog2.htm
+/UpgradeLog.htm
+/glfont.vcxproj.filters
+/glfont.vcxproj
+/.gitignore
+/.gitignore
+/Backup1/glfont.sln
+/Backup/glfont.sln
+/.vs/VSWorkspaceState.json
+/.vs/glfont/v17/Browse.VC.db
+/.vs/glfont/v17/.suo
+/.vs/glfont/FileContentIndex/read.lock
+/.vs/glfont/FileContentIndex/3aa06282-c674-4104-97a3-080dff937437.vsidx
+/.vs/bmfontgl_Proj_Alice_version/v17/.wsuo
