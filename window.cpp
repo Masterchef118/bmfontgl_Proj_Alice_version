@@ -122,9 +122,14 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   char oldDir[MAX_PATH];
   GetCurrentDirectory(MAX_PATH, oldDir);
-  const char* newDir = R"(D:\Victoria.II.v3.04.Inclu.ALL.DLC\Victoria.II.v3.04.Inclu.ALL.DLC\gfx\fonts)";
+  //Replace with directory containing your .fnt and .tga files. Ex: "C:\\...\\VictoriaII\\gfx\\fonts",
+  char* newDir = "C:\\...\\VictoriaII\\gfx\\fonts";
+  //Replace with .tga image file. Ex: "Arial_17.tga".
+  char* tgafile = "Arial_17.tga";
+  //Replace with .fnt file. Ex: "Arial_17.fnt".
+  char* fntfile = "Arial_17.fnt";
   SetCurrentDirectory(newDir);
-  if (!vic_22_bl.LoadFont("vic_22_bl.fnt", oldDir))
+  if (!vic_22_bl.LoadFont(fntfile, oldDir, newDir, tgafile))
   {
 	  MessageBox(NULL, "Error, font file not found, exiting", "File Not Found", MB_ICONERROR | MB_OK);
 	  Quit = TRUE;

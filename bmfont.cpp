@@ -275,7 +275,7 @@ struct PixelInserter {
 	}
 };
 
-bool  BMFont::LoadFont(char *fontfile, char* olddir)
+bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile)
 {
 	std::vector<uint8_t> storage;
 	std::ifstream Stream(fontfile);
@@ -287,14 +287,15 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir)
 	Stream.close();
 
 	rgba8_image_t img;
-	read_and_convert_image("D:/Victoria.II.v3.04.Inclu.ALL.DLC/Victoria.II.v3.04.Inclu.ALL.DLC/gfx/fonts/vic_22_bl.tga", img, targa_tag());
+	//Change to name of .tga file.
+	read_and_convert_image(tgafile, img, targa_tag());
 
 	storage.reserve(img.width() * img.height() * num_channels<rgba8_image_t>());
 	for_each_pixel(const_view(img), PixelInserter(&storage));
 
 	SetCurrentDirectory(olddir);
 
-	LodePNG::encode("vic_22_bl.png", storage, 256, 256);
+	LodePNG::encode(replace_str(tgafile, ".tga", ".png"), storage, 256, 256);
 	
 	//Ok, we have a file. Can we get the Texture as well?
     char* buf=replace_str( fontfile,".fnt", ".png");
@@ -306,8 +307,7 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir)
 		return false;         
 	}
 
-	const char* newDir = R"(D:\Victoria.II.v3.04.Inclu.ALL.DLC\Victoria.II.v3.04.Inclu.ALL.DLC\gfx\fonts)";
-	SetCurrentDirectory(newDir);
+	SetCurrentDirectory(newdir);
 	
 	wrlog("Starting to Parse Font %s",fontfile);
 	ParseFont(fontfile);
