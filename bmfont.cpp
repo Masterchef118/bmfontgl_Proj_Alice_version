@@ -40,12 +40,12 @@ Although I'm giving this away, I'd appreciate an email with fixes or better code
 
 aaedev@gmail.com 2012
 */
-
+#define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL/glew.h>
-#include <GL/wglew.h>
+#include "glew.h"
+#include "wglew.h"
 #include "log.h"
 #include <iostream>
 #include <fstream>
@@ -54,6 +54,10 @@ aaedev@gmail.com 2012
 #include "log.h"
 #include "bmfont.h"
 #include "gl_basics.h"
+#include <boost/gil.hpp>
+#include <boost/gil/extension/io/targa.hpp>
+#include "lodepng.h"
+using namespace boost::gil;
 
 
 #pragma warning (disable : 4996 )
@@ -260,9 +264,20 @@ float BMFont::GetStringWidth(const char *string)
   return total * fscale;
 }
 
+struct PixelInserter {
+	std::vector<uint8_t>* storage;
+	PixelInserter(std::vector<uint8_t>* s) : storage(s) {}
+	void operator()(boost::gil::rgba8_pixel_t p) const {
+		storage->push_back(boost::gil::at_c<0>(p));
+		storage->push_back(boost::gil::at_c<1>(p));
+		storage->push_back(boost::gil::at_c<2>(p));
+		storage->push_back(boost::gil::at_c<3>(p));
+	}
+};
 
-bool  BMFont::LoadFont(char *fontfile)
+bool  BMFont::LoadFont(char *fontfile, char* olddir)
 {
+	std::vector<uint8_t> storage;
 	std::ifstream Stream(fontfile);
 	if ( !Stream.is_open() )          
 	{   
@@ -270,6 +285,16 @@ bool  BMFont::LoadFont(char *fontfile)
 		return false;         
 	}
 	Stream.close();
+
+	rgba8_image_t img;
+	read_and_convert_image("D:/Victoria.II.v3.04.Inclu.ALL.DLC/Victoria.II.v3.04.Inclu.ALL.DLC/gfx/fonts/vic_22_bl.tga", img, targa_tag());
+
+	storage.reserve(img.width() * img.height() * num_channels<rgba8_image_t>());
+	for_each_pixel(const_view(img), PixelInserter(&storage));
+
+	SetCurrentDirectory(olddir);
+
+	LodePNG::encode("vic_22_bl.png", storage, 256, 256);
 	
 	//Ok, we have a file. Can we get the Texture as well?
     char* buf=replace_str( fontfile,".fnt", ".png");
@@ -280,6 +305,9 @@ bool  BMFont::LoadFont(char *fontfile)
 		wrlog("Cannot find font texture for loading %s",fontfile);
 		return false;         
 	}
+
+	const char* newDir = R"(D:\Victoria.II.v3.04.Inclu.ALL.DLC\Victoria.II.v3.04.Inclu.ALL.DLC\gfx\fonts)";
+	SetCurrentDirectory(newDir);
 	
 	wrlog("Starting to Parse Font %s",fontfile);
 	ParseFont(fontfile);

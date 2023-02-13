@@ -98,8 +98,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
   BMFont Snap;
   BMFont Times;
   BMFont Lucida;
+  BMFont vic_22_bl;
 
-  if (!Lucida.LoadFont("lucida.fnt"))
+  /*if (!Lucida.LoadFont("lucida.fnt"))
   {
    MessageBox(NULL, "Error, font file not found, exiting", "File Not Found",MB_ICONERROR | MB_OK);
    Quit = TRUE;
@@ -117,6 +118,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
   {
    MessageBox(NULL, "Error, font file not found, exiting", "File Not Found",MB_ICONERROR | MB_OK);
    Quit = TRUE;
+  }*/
+
+  char oldDir[MAX_PATH];
+  GetCurrentDirectory(MAX_PATH, oldDir);
+  const char* newDir = R"(D:\Victoria.II.v3.04.Inclu.ALL.DLC\Victoria.II.v3.04.Inclu.ALL.DLC\gfx\fonts)";
+  SetCurrentDirectory(newDir);
+  if (!vic_22_bl.LoadFont("vic_22_bl.fnt", oldDir))
+  {
+	  MessageBox(NULL, "Error, font file not found, exiting", "File Not Found", MB_ICONERROR | MB_OK);
+	  Quit = TRUE;
   }
   wrlog("Font Loaded Sucessfully");
   
@@ -139,7 +150,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   // ********** OpenGL drawing code, very simple, just to show of the font. **********
 
-      glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+      glClearColor( 100.0f, 0.0f, 0.0f, 0.0f );
       glClear( GL_COLOR_BUFFER_BIT );
       
       // setup texture mapping
@@ -150,7 +161,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	  glLoadIdentity();	
 	
-	  Times.SetColor(250,251,252,255);
+	  /*Times.SetColor(250, 251, 252, 255);
 	  Times.PrintCenter(280,"This is a different font, centered.");
 	  
 	  Lucida.SetColor(250,250,55,254);
@@ -164,7 +175,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	  Snap.Print(2, Snap.GetHeight()/2, "Or it can make it smaller!");
 	  Snap.SetScale(1.0f);
 	  Snap.SetColor(255,255,255,255);
-	  Snap.PrintCenter(320, "Centered printing: To Ti");
+	  Snap.PrintCenter(320, "Centered printing: To Ti");*/
+
+	  vic_22_bl.SetColor(250, 251, 252, 255);
+	  vic_22_bl.PrintCenter(280, "Factories, Foreign Investment, Production, Projects");
 	
 	  GlSwap();
      }

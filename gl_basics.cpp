@@ -26,7 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org/>
 */
-
+#define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>

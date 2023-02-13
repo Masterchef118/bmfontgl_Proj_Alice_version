@@ -95,7 +95,7 @@ class BMFont
 
  public:
 	
-	bool LoadFont(char *);
+	bool LoadFont(char *, char*);
 	void SetColor(int r, int g, int b, int a) {fcolor = MAKE_RGBA(r,g,b,a);}
 	void SetBlend(int b) {fblend = b;}
 	void SetScale(float scale){fscale = scale;}
