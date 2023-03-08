@@ -54,10 +54,8 @@ aaedev@gmail.com 2012
 #include "log.h"
 #include "bmfont.h"
 #include "gl_basics.h"
-#include <boost/gil.hpp>
-#include <boost/gil/extension/io/targa.hpp>
+#include "tga.h"
 #include "lodepng.h"
-using namespace boost::gil;
 
 
 #pragma warning (disable : 4996 )
@@ -264,20 +262,8 @@ float BMFont::GetStringWidth(const char *string)
   return total * fscale;
 }
 
-struct PixelInserter {
-	std::vector<uint8_t>* storage;
-	PixelInserter(std::vector<uint8_t>* s) : storage(s) {}
-	void operator()(boost::gil::rgba8_pixel_t p) const {
-		storage->push_back(boost::gil::at_c<0>(p));
-		storage->push_back(boost::gil::at_c<1>(p));
-		storage->push_back(boost::gil::at_c<2>(p));
-		storage->push_back(boost::gil::at_c<3>(p));
-	}
-};
-
 bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile)
 {
-	std::vector<uint8_t> storage;
 	std::ifstream Stream(fontfile);
 	if ( !Stream.is_open() )          
 	{   
@@ -286,16 +272,25 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile
 	}
 	Stream.close();
 
-	rgba8_image_t img;
+	FILE* f = std::fopen("vic_22_bl.tga", "rb");
+	tga::StdioFileInterface file(f);
+	tga::Decoder decoder(&file);
+	tga::Header header;
 
-	read_and_convert_image(tgafile, img, targa_tag());
+	decoder.readHeader(header);
 
-	storage.reserve(img.width() * img.height() * num_channels<rgba8_image_t>());
-	for_each_pixel(const_view(img), PixelInserter(&storage));
+	tga::Image image;
+	image.bytesPerPixel = header.bytesPerPixel();
+	image.rowstride = header.width * header.bytesPerPixel();
+
+	std::vector<uint8_t> buffer(image.rowstride * header.height);
+	image.pixels = &buffer[0];
+
+	decoder.readImage(header, image, nullptr);
 
 	SetCurrentDirectory(olddir);
 
-	LodePNG::encode(replace_str(tgafile, ".tga", ".png"), storage, 256, 256);
+	LodePNG::encode(replace_str(tgafile, ".tga", ".png"), buffer, 256, 256);
 	
 	//Ok, we have a file. Can we get the Texture as well?
     char* buf=replace_str( fontfile,".fnt", ".png");
