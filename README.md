@@ -8,6 +8,6 @@ program to not crash.
 
 To enter your desired directory and file names, go to line 125 of window.cpp.
 
-The only user-provided requirements (at the moment) are boost and the boost filesystem-vc143.
+There are NO user-provided requirements.
 
 This project has been forked and modified from the original at: https://github.com/dharani811/bmfontgl
