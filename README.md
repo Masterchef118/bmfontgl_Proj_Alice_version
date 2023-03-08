@@ -6,6 +6,6 @@ The program looks in a certain directory given in the code for the files it need
 are also given in the code. This directory must be a real location and must contain the named .fnt and .tga files for the 
 program to not crash.
 
-The only user-provided requirements (at the moment) are boost and the boost filesystem-vc143.
+There are NO user-provided requirements.
 
 This project has been forked and modified from the original at: https://github.com/dharani811/bmfontgl
