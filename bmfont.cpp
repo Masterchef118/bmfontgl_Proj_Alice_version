@@ -44,7 +44,6 @@ aaedev@gmail.com 2012
 #include <stdio.h>
 #include <stdlib.h>
 #include "glew.h"
-#include "wglew.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -56,16 +55,6 @@ aaedev@gmail.com 2012
 
 
 #pragma warning (disable : 4996 )
-
-/*typedef struct tagRECT
-{
-	long    left;
-	long    top;
-	long    right;
-	long    bottom;
-} RECT;*/
-
-extern  RECT MyWindow;
 
 //Todo: Add buffer overflow checking.
 
@@ -530,7 +519,7 @@ void BMFont::PrintCenter( float y, const char *string)
 	int x=0;
 	CharDescriptor  *f;		 
 	
-	int window_width = MyWindow.right;
+	int window_width = 500;
 
 		int len = strlen(string);
 
@@ -545,7 +534,7 @@ void BMFont::PrintCenter( float y, const char *string)
 			 x +=  f->XAdvance;
 		}
 
-	Print( (float)(MyWindow.right/2) - (x/2) , y, string);
+	Print( (float)(500/2) - (x/2) , y, string);
 }
 
 
