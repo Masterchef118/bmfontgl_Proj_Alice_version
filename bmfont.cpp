@@ -53,10 +53,18 @@ aaedev@gmail.com 2012
 #include "gl_basics.h"
 #include "tga.h"
 #include "lodepng.h"
+#include <stdarg.h>
 
 
 #pragma warning (disable : 4996 )
 
+/*typedef struct tagRECT
+{
+	long    left;
+	long    top;
+	long    right;
+	long    bottom;
+} RECT;*/
 
 extern  RECT MyWindow;
 
@@ -259,7 +267,7 @@ float BMFont::GetStringWidth(const char *string)
   return total * fscale;
 }
 
-bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile)
+std::vector<uint8_t> BMFont::LoadFontImage(char *fontfile, char* olddir, char* newdir, char* tgafile)
 {
 	std::ifstream Stream(fontfile);
 	Stream.close();
@@ -280,19 +288,24 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile
 
 	decoder.readImage(header, image, nullptr);
 
-	SetCurrentDirectory(olddir);
+	return buffer;
+}
+
+bool BMFont::MakePNG(char* fontfile, char* tgafile, std::vector<uint8_t> buffer) {
 
 	LodePNG::encode(replace_str(tgafile, ".tga", ".png"), buffer, 256, 256);
-	
+
 	//Ok, we have a file. Can we get the Texture as well?
-    char* buf=replace_str( fontfile,".fnt", ".png");
+	char* buf = replace_str(fontfile, ".fnt", ".png");
 
 	ftexid = LoadPNG(buf);
 
-	SetCurrentDirectory(newdir);
-	
+	return true;
+}
+
+bool BMFont::LoadFontfile(char* fontfile) {
 	ParseFont(fontfile);
-	KernCount = (int) Kearn.size();
+	KernCount = (int)Kearn.size();
 
 	return true;
 }

@@ -125,11 +125,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
   //Replace with .fnt file. Ex: "Arial_17.fnt".
   char* fntfile = "vic_22_bl.fnt";
   SetCurrentDirectory(newDir);
-  if (!vic_22_bl.LoadFont(fntfile, oldDir, newDir, tgafile))
-  {
-	  MessageBox(NULL, "Error, font file not found, exiting", "File Not Found", MB_ICONERROR | MB_OK);
-	  Quit = TRUE;
-  }
+  std::vector<uint8_t> buffer = vic_22_bl.LoadFontImage(fntfile, oldDir, newDir, tgafile);
+  SetCurrentDirectory(oldDir);
+  vic_22_bl.MakePNG(fntfile, tgafile, buffer);
+  SetCurrentDirectory(newDir);
+  vic_22_bl.LoadFontfile(fntfile);
+  //if (!vic_22_bl.LoadFont(fntfile, oldDir, newDir, tgafile))
+  //{
+	  //MessageBox(NULL, "Error, font file not found, exiting", "File Not Found", MB_ICONERROR | MB_OK);
+	  //Quit = TRUE;
+  //}
   //wrlog("Font Loaded Sucessfully");
   
   // ********** Program Main Loop **********
