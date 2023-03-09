@@ -1,13 +1,8 @@
 # bmfontgl_Proj_Alice_version
 Modification of bmfontgl to prepare it for integration into Project Alice. See Project Alice here: https://github.com/schombert/Project-Alice
 
-This program can read bitmap font files (.fnt and .tga only), generate a font from them, and render given text in that font.
-The program looks in a certain directory given in the code for the files it needs. The file names the program looks for
-are also given in the code. This directory must be a real location and must contain the named .fnt and .tga files for the 
-program to not crash.
+This library (the files 'bmfont.cpp' and 'bmfont.h') can read bitmap font files (.fnt and .tga only) and generate a font from them for a program to then use. The library creates OpenGL textures containing each character. The final rendering of the text in a window is up to the program using the library, and is not done by the library.
 
-To enter your desired directory and file names, go to line 125 of window.cpp.
-
-There are NO user-provided requirements.
+There are NO user-provided dependencies. All dependencies are providing in this repository. 'bmfont.cpp' and 'bmfont.h' contain the library. The rest of the files are dependencies.
 
 This project has been forked and modified from the original at: https://github.com/dharani811/bmfontgl

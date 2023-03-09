@@ -41,27 +41,20 @@ Although I'm giving this away, I'd appreciate an email with fixes or better code
 aaedev@gmail.com 2012
 */
 #define NOMINMAX
-#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "glew.h"
-#include "wglew.h"
-#include "log.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream> 
-#include "log.h"
 #include "bmfont.h"
-#include "gl_basics.h"
 #include "tga.h"
 #include "lodepng.h"
+#include <stdarg.h>
 
 
 #pragma warning (disable : 4996 )
-
-
-extern  RECT MyWindow;
 
 //Todo: Add buffer overflow checking.
 
@@ -262,17 +255,85 @@ float BMFont::GetStringWidth(const char *string)
   return total * fscale;
 }
 
-bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile)
+GLuint LoadPNG(char* filename)
+{
+
+	GLuint temptex;
+
+	std::vector< unsigned char > rawImage;
+	LodePNG::loadFile(rawImage, filename);
+
+	LodePNG::Decoder decoder;
+	std::vector< unsigned char > image;
+	decoder.decode(image, rawImage.empty() ? 0 : &rawImage[0],
+		(unsigned)rawImage.size());
+	//
+	// Flip and invert the PNG image since OpenGL likes to load everything
+	// backwards from what is considered normal!
+	//
+
+	unsigned char* imagePtr = &image[0];
+	int halfTheHeightInPixels = decoder.getHeight() / 2;
+	int heightInPixels = decoder.getHeight();
+
+	// Assuming RGBA for 4 components per pixel.
+	int numColorComponents = 4;
+
+	// Assuming each color component is an unsigned char.
+	int widthInChars = decoder.getWidth() * numColorComponents;
+
+	unsigned char* top = NULL;
+	unsigned char* bottom = NULL;
+	unsigned char temp = 0;
+
+	for (int h = 0; h < halfTheHeightInPixels; ++h)
+	{
+		top = imagePtr + h * widthInChars;
+		bottom = imagePtr + (heightInPixels - h - 1) * widthInChars;
+
+		for (int w = 0; w < widthInChars; ++w)
+		{
+			// Swap the chars around.
+			temp = *top;
+			*top = *bottom;
+			*bottom = temp;
+
+			++top;
+			++bottom;
+		}
+	}
+	//
+	// Create the OpenGL texture and fill it with our PNG image.
+	//
+	// Allocates one texture handle
+	//glHint (GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+
+	glGenTextures(1, &temptex);
+
+	// Binds this texture handle so we can load the data into it
+	glBindTexture(GL_TEXTURE_2D, temptex);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(),
+		decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+		&image[0]);
+
+
+	rawImage.clear();
+
+	return temptex;
+}
+
+std::vector<uint8_t> BMFont::LoadFontImage(char *fontfile, char* olddir, char* newdir, char* tgafile)
 {
 	std::ifstream Stream(fontfile);
-	if ( !Stream.is_open() )          
-	{   
-		wrlog("Cannot Find Font File %s",fontfile);
-		return false;         
-	}
 	Stream.close();
 
-	FILE* f = std::fopen("vic_22_bl.tga", "rb");
+	FILE* f = std::fopen(tgafile, "rb");
 	tga::StdioFileInterface file(f);
 	tga::Decoder decoder(&file);
 	tga::Header header;
@@ -288,26 +349,24 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile
 
 	decoder.readImage(header, image, nullptr);
 
-	SetCurrentDirectory(olddir);
+	return buffer;
+}
+
+bool BMFont::MakePNG(char* fontfile, char* tgafile, std::vector<uint8_t> buffer) {
 
 	LodePNG::encode(replace_str(tgafile, ".tga", ".png"), buffer, 256, 256);
-	
+
 	//Ok, we have a file. Can we get the Texture as well?
-    char* buf=replace_str( fontfile,".fnt", ".png");
+	char* buf = replace_str(fontfile, ".fnt", ".png");
 
 	ftexid = LoadPNG(buf);
-    if (!ftexid)
-	{   
-		wrlog("Cannot find font texture for loading %s",fontfile);
-		return false;         
-	}
 
-	SetCurrentDirectory(newdir);
-	
-	wrlog("Starting to Parse Font %s",fontfile);
+	return true;
+}
+
+bool BMFont::LoadFontfile(char* fontfile) {
 	ParseFont(fontfile);
-	wrlog("Finished Parsing Font %s",fontfile);
-	KernCount = (int) Kearn.size();
+	KernCount = (int)Kearn.size();
 
 	return true;
 }
@@ -333,6 +392,32 @@ void Render_String(int len)
    glDisableClientState(GL_COLOR_ARRAY);
 }
 
+void use_texture(GLuint* texture, GLboolean linear, GLboolean mipmapping)
+{
+	GLenum filter = linear ? GL_LINEAR : GL_NEAREST;
+	glBindTexture(GL_TEXTURE_2D, *texture);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	if (mipmapping)
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	else
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLfloat)filter);
+}
+
+void SetBlendMode(int mode)
+{
+	if (mode) {
+		glEnable(GL_ALPHA_TEST);
+		glDisable(GL_BLEND);
+		glAlphaFunc(GL_GREATER, 0.5f);
+	}
+	else {
+		glDisable(GL_ALPHA_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+}
 
 void BMFont::Print(float x, float y, const char *fmt, ...)
 {
@@ -434,7 +519,7 @@ void BMFont::PrintCenter( float y, const char *string)
 	int x=0;
 	CharDescriptor  *f;		 
 	
-	int window_width = MyWindow.right;
+	int window_width = 500;
 
 		int len = strlen(string);
 
@@ -449,7 +534,7 @@ void BMFont::PrintCenter( float y, const char *string)
 			 x +=  f->XAdvance;
 		}
 
-	Print( (float)(MyWindow.right/2) - (x/2) , y, string);
+	Print( (float)(500/2) - (x/2) , y, string);
 }
 
 
@@ -457,5 +542,5 @@ BMFont::~BMFont()
 {
 	Chars.clear();
 	Kearn.clear();
-	FreeTexture(ftexid);
+	glDeleteTextures(1, &ftexid);
 }
