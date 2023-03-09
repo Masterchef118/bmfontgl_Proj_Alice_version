@@ -41,7 +41,6 @@ Although I'm giving this away, I'd appreciate an email with fixes or better code
 aaedev@gmail.com 2012
 */
 #define NOMINMAX
-#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "glew.h"
