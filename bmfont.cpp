@@ -46,12 +46,10 @@ aaedev@gmail.com 2012
 #include <stdlib.h>
 #include "glew.h"
 #include "wglew.h"
-#include "log.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream> 
-#include "log.h"
 #include "bmfont.h"
 #include "gl_basics.h"
 #include "tga.h"
@@ -265,14 +263,9 @@ float BMFont::GetStringWidth(const char *string)
 bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile)
 {
 	std::ifstream Stream(fontfile);
-	if ( !Stream.is_open() )          
-	{   
-		wrlog("Cannot Find Font File %s",fontfile);
-		return false;         
-	}
 	Stream.close();
 
-	FILE* f = std::fopen("vic_22_bl.tga", "rb");
+	FILE* f = std::fopen(tgafile, "rb");
 	tga::StdioFileInterface file(f);
 	tga::Decoder decoder(&file);
 	tga::Header header;
@@ -296,17 +289,10 @@ bool  BMFont::LoadFont(char *fontfile, char* olddir, char* newdir, char* tgafile
     char* buf=replace_str( fontfile,".fnt", ".png");
 
 	ftexid = LoadPNG(buf);
-    if (!ftexid)
-	{   
-		wrlog("Cannot find font texture for loading %s",fontfile);
-		return false;         
-	}
 
 	SetCurrentDirectory(newdir);
 	
-	wrlog("Starting to Parse Font %s",fontfile);
 	ParseFont(fontfile);
-	wrlog("Finished Parsing Font %s",fontfile);
 	KernCount = (int) Kearn.size();
 
 	return true;

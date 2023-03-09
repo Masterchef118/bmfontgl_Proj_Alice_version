@@ -3,7 +3,6 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include "gl_basics.h"
-#include "log.h"
 #include "globals.h"
 #include "bmfont.h"
 
@@ -79,15 +78,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   //********** Program Initializations *************
 
-  open_log("glfont.log");
   // enable OpenGL for the window
   CreateGLContext();
   ShowWindow(hWnd,SW_SHOW);                                         // Show The Window
   SetForegroundWindow(hWnd);									    // Slightly Higher Priority
   SetFocus(hWnd);													// Sets Keyboard Focus To The Window
   ReSizeGLScene(WinWidth, WinHeight);										    // Set Up Our Perspective GL Screen
-  
-  wrlog("Starting Program");
  
   CheckGLVersionSupport();
 
@@ -194,7 +190,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
  
   // shutdown OpenGL
   DeleteGLContext();
-  close_log();
 
   // destroy the window 
   DestroyWindow( hWnd );

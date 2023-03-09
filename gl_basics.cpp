@@ -31,10 +31,8 @@ For more information, please refer to <http://unlicense.org/>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
 #include <gl/gl.h>
 #include <gl/glu.h>
-#include "log.h"
 #include "globals.h"
 #include "gl_basics.h"
 #include "lodepng.h"
@@ -93,7 +91,6 @@ void CheckGLVersionSupport()
 
   version = (char *) glGetString(GL_VERSION);
   sscanf_s(version, "%d.%d", &major, &minor, sizeof(version));
-  wrlog("OpenGl Version supported %d,%d",major,minor);
  
   if (major < 2)
   {
@@ -297,8 +294,7 @@ void SnapShot()
   strcat(temppath,"SS");
   strcat(temppath,buf);
   strcat(temppath,".bmp");
-  strcat(temppath,"\0");
-  wrlog("Saving Snapshot: %s",temppath);      
+  strcat(temppath,"\0");      
 
   filePtr = fopen(temppath, "wb");
   if (!filePtr)
