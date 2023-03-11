@@ -32,6 +32,7 @@ For more information, please refer to <http://unlicense.org/>
 
 #include <vector>
 #include <map>
+#include <string>
 
 #ifndef MAKE_RGBA
  
@@ -97,7 +98,7 @@ class BMFont
 	
 	std::vector<uint8_t> LoadFontImage(char *, char*, char*, char*);
 	bool LoadFontfile(char*);
-	bool MakePNG(char*, char*, std::vector<uint8_t>);
+	bool MakePNG(std::string, std::string, std::vector<uint8_t>);
 	void SetColor(int r, int g, int b, int a) {fcolor = MAKE_RGBA(r,g,b,a);}
 	void SetBlend(int b) {fblend = b;}
 	void SetScale(float scale){fscale = scale;}

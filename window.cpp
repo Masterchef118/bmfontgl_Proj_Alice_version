@@ -5,6 +5,7 @@
 #include "gl_basics.h"
 #include "globals.h"
 #include "bmfont.h"
+#include <string>
 
 #pragma warning (disable : 4996)
 
