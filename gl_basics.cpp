@@ -105,7 +105,7 @@ void FreeTexture( GLuint texture )
 }
 
 
-GLuint LoadPNG(char* filename) 
+/*GLuint LoadPNG(char* filename)
 {
 
 	GLuint temptex;
@@ -176,7 +176,7 @@ GLuint LoadPNG(char* filename)
 	rawImage.clear(); 
 	
 	return temptex;
-}
+}*/
 
 
 GLvoid ReSizeGLScene(GLsizei width, GLsizei height)             // Resize And Initialize The GL Window

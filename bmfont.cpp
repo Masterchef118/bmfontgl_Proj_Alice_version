@@ -238,32 +238,31 @@ float BMFont::GetStringWidth(const char *string)
   return total * fscale;
 }
 
-GLuint LoadPNG(std::string filename)
+GLuint LoadPNG(std::string filename, std::vector<uint8_t> tgainput)
 {
 
 	GLuint temptex;
 
-	std::vector< unsigned char > rawImage;
-	LodePNG::loadFile(rawImage, filename);
+	std::vector<unsigned char> rawImage;
+	//std::vector<unsigned char> rawImage2;
+	lodepng::encode(rawImage, tgainput, 256, 256);
+	
+	std::vector<unsigned char> image;
 
-	LodePNG::Decoder decoder;
-	std::vector< unsigned char > image;
-	decoder.decode(image, rawImage.empty() ? 0 : &rawImage[0],
-		(unsigned)rawImage.size());
-	//
-	// Flip and invert the PNG image since OpenGL likes to load everything
-	// backwards from what is considered normal!
-	//
+	unsigned height = 256;
+	unsigned width = 256;
+
+	lodepng::decode(image, width, height, rawImage);
 
 	unsigned char* imagePtr = &image[0];
-	int halfTheHeightInPixels = decoder.getHeight() / 2;
-	int heightInPixels = decoder.getHeight();
+	int halfTheHeightInPixels = 256 / 2;
+	int heightInPixels = 256;
 
 	// Assuming RGBA for 4 components per pixel.
 	int numColorComponents = 4;
 
 	// Assuming each color component is an unsigned char.
-	int widthInChars = decoder.getWidth() * numColorComponents;
+	int widthInChars = 256 * numColorComponents;
 
 	unsigned char* top = NULL;
 	unsigned char* bottom = NULL;
@@ -301,8 +300,8 @@ GLuint LoadPNG(std::string filename)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(),
-		decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256,
+		256, 0, GL_RGBA, GL_UNSIGNED_BYTE,
 		&image[0]);
 
 
@@ -337,12 +336,12 @@ std::vector<uint8_t> BMFont::LoadFontImage(char *fontfile, char* olddir, char* n
 
 bool BMFont::MakePNG(std::string fontfile, std::string tgafile, std::vector<uint8_t> buffer) {
 
-	LodePNG::encode(tgafile.replace(tgafile.size()-4, tgafile.size(), ".png"), buffer, 256, 256);
+	//LodePNG::encode(tgafile.replace(tgafile.size()-4, tgafile.size(), ".png"), buffer, 256, 256);
 
 	//Ok, we have a file. Can we get the Texture as well?
 	std::string buf = tgafile.replace(fontfile.size() - 4, fontfile.size(), ".png");
 
-	ftexid = LoadPNG(buf);
+	ftexid = LoadPNG(buf, buffer);
 
 	return true;
 }
