@@ -97,7 +97,7 @@ class BMFont
  public:
 	
 	std::vector<uint8_t> LoadFontImage(char *, char*, char*, char*);
-	bool LoadFontfile(char*);
+	bool LoadFontfile(std::string);
 	bool MakePNG(std::string, std::string, std::vector<uint8_t>);
 	void SetColor(int r, int g, int b, int a) {fcolor = MAKE_RGBA(r,g,b,a);}
 	void SetBlend(int b) {fblend = b;}
@@ -130,7 +130,7 @@ private:
 	float fscale;
 	int fblend;
 
-	bool ParseFont(char *);
+	bool ParseFont(std::string);
 	int GetKerningPair(int, int);
 	float GetStringWidth(const char *);
 

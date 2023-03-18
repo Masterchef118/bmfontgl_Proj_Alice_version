@@ -71,7 +71,7 @@ typedef struct
 vlist texlst[2048*4];
 
 
-bool BMFont::ParseFont(char *fontfile )
+bool BMFont::ParseFont(std::string fontfile )
 {
 	std::ifstream Stream(fontfile); 
 	std::string Line;
@@ -238,24 +238,16 @@ float BMFont::GetStringWidth(const char *string)
   return total * fscale;
 }
 
-GLuint LoadPNG(std::string filename, std::vector<uint8_t> tgainput)
+GLuint LoadPNG(std::vector<uint8_t> image)
 {
 
 	GLuint temptex;
 
-	std::vector<unsigned char> rawImage;
-	//std::vector<unsigned char> rawImage2;
-	lodepng::encode(rawImage, tgainput, 256, 256);
-	
-	std::vector<unsigned char> image;
-
 	unsigned height = 256;
 	unsigned width = 256;
 
-	lodepng::decode(image, width, height, rawImage);
-
 	unsigned char* imagePtr = &image[0];
-	int halfTheHeightInPixels = 256 / 2;
+	int halfTheHeightInPixels = 256;
 	int heightInPixels = 256;
 
 	// Assuming RGBA for 4 components per pixel.
@@ -264,9 +256,12 @@ GLuint LoadPNG(std::string filename, std::vector<uint8_t> tgainput)
 	// Assuming each color component is an unsigned char.
 	int widthInChars = 256 * numColorComponents;
 
+	
 	unsigned char* top = NULL;
 	unsigned char* bottom = NULL;
 	unsigned char temp = 0;
+
+	//std::FILE* fp = std::fopen("findid.txt", "w");
 
 	for (int h = 0; h < halfTheHeightInPixels; ++h)
 	{
@@ -275,15 +270,24 @@ GLuint LoadPNG(std::string filename, std::vector<uint8_t> tgainput)
 
 		for (int w = 0; w < widthInChars; ++w)
 		{
+
+			//std::fprintf(fp, "\n%d", *top);
+
 			// Swap the chars around.
-			temp = *top;
-			*top = *bottom;
-			*bottom = temp;
+			//temp = *top;
+			//std::fprintf(fp, "\n%d", temp);
+			//*top = *bottom;
+			//std::fprintf(fp, "\n%d", *bottom);
+			*bottom = *top;
+			//std::fprintf(fp, "\n%d", *bottom);
 
 			++top;
 			++bottom;
 		}
+		//std::fprintf(fp, "\n%d", *top);
 	}
+
+	//std::fclose(fp);
 	//
 	// Create the OpenGL texture and fill it with our PNG image.
 	//
@@ -295,17 +299,12 @@ GLuint LoadPNG(std::string filename, std::vector<uint8_t> tgainput)
 	// Binds this texture handle so we can load the data into it
 	glBindTexture(GL_TEXTURE_2D, temptex);
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256,
-		256, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-		&image[0]);
-
-
-	rawImage.clear();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
 
 	return temptex;
 }
@@ -341,12 +340,12 @@ bool BMFont::MakePNG(std::string fontfile, std::string tgafile, std::vector<uint
 	//Ok, we have a file. Can we get the Texture as well?
 	std::string buf = tgafile.replace(fontfile.size() - 4, fontfile.size(), ".png");
 
-	ftexid = LoadPNG(buf, buffer);
+	ftexid = LoadPNG(buffer);
 
 	return true;
 }
 
-bool BMFont::LoadFontfile(char* fontfile) {
+bool BMFont::LoadFontfile(std::string fontfile) {
 	ParseFont(fontfile);
 	KernCount = (short)Kearn.size();
 
@@ -366,7 +365,7 @@ void Render_String(int len)
    glEnableClientState(GL_COLOR_ARRAY);
    glColorPointer (4, GL_UNSIGNED_BYTE , sizeof(vlist) , &texlst[0].r);
 
-   glDrawArrays(GL_QUADS, 0, len*4);// 4 Coordinates for a Quad. Could use DrawElements here instead GL 3.X+ GL_TRIANGLE_STRIP? 
+   glDrawArrays(GL_TRIANGLE_FAN, 0, (len*4));// 4 Coordinates for a Quad. Could use DrawElements here instead GL 3.X+ GL_TRIANGLE_STRIP? 
  
    //Finished Drawing, disable client states.
    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -424,7 +423,7 @@ void BMFont::Print(float x, float y, const char *fmt, ...)
 	va_end(ap);		
 
 	//Select and enable the font texture. (With mipmapping.)
-  	use_texture(&ftexid, 0,1);
+  	//use_texture(&ftexid, 0,1);
     //Set type of blending to use with this font.
 	SetBlendMode(fblend);
    	//Set Text Color, all one color for now. 
@@ -444,44 +443,44 @@ void BMFont::Print(float x, float y, const char *fmt, ...)
 	     DstY = CurY - f->Height;
 		 			    
          //0,1 Texture Coord
-		 texlst[i*4].texx = adv*f->x;
-		 texlst[i*4].texy = (float) 1.0 -(adv * (f->y + f->Height) );
-         texlst[i*4].x = (float) fscale * CurX;
-		 texlst[i*4].y = (float) fscale * DstY;
-		 texlst[i*4].r = color[0];
-		 texlst[i*4].g = color[1];
-		 texlst[i*4].b = color[2];
-		 texlst[i*4].a = color[3];
+		 texlst[0*4].texx = adv*f->x;
+		 texlst[0*4].texy = (float) 1.0 -(adv * (f->y + f->Height) );
+         texlst[0*4].x = (float) fscale * CurX;
+		 texlst[0*4].y = (float) fscale * DstY;
+		 texlst[0*4].r = color[0];
+		 texlst[0*4].g = color[1];
+		 texlst[0*4].b = color[2];
+		 texlst[0*4].a = color[3];
 
 		 //1,1 Texture Coord
-		 texlst[(i*4)+1].texx = adv*(f->x+f->Width);
-		 texlst[(i*4)+1].texy = (float) 1.0 -(adv * (f->y + f->Height) );
-         texlst[(i*4)+1].x = (float) fscale * DstX;
-		 texlst[(i*4)+1].y = (float) fscale * DstY;
-		 texlst[(i*4)+1].r = color[0];
-		 texlst[(i*4)+1].g = color[1];
-		 texlst[(i*4)+1].b = color[2];
-		 texlst[(i*4)+1].a = color[3];
+		 texlst[(0*4)+1].texx = adv*(f->x+f->Width);
+		 texlst[(0*4)+1].texy = (float) 1.0 -(adv * (f->y + f->Height) );
+         texlst[(0*4)+1].x = (float) fscale * DstX;
+		 texlst[(0*4)+1].y = (float) fscale * DstY;
+		 texlst[(0*4)+1].r = color[0];
+		 texlst[(0*4)+1].g = color[1];
+		 texlst[(0*4)+1].b = color[2];
+		 texlst[(0*4)+1].a = color[3];
 
 		 //1,0 Texture Coord
-		 texlst[(i*4)+2].texx = adv*(f->x+f->Width);
-		 texlst[(i*4)+2].texy = (float) 1.0 -(adv*f->y);
-         texlst[(i*4)+2].x = (float) fscale * DstX;
-		 texlst[(i*4)+2].y = (float) fscale * CurY;
-		 texlst[(i*4)+2].r = color[0];
-		 texlst[(i*4)+2].g = color[1];
-		 texlst[(i*4)+2].b = color[2];
-		 texlst[(i*4)+2].a = color[3];
+		 texlst[(0*4)+2].texx = adv*(f->x+f->Width);
+		 texlst[(0*4)+2].texy = (float) 1.0 -(adv*f->y);
+         texlst[(0*4)+2].x = (float) fscale * DstX;
+		 texlst[(0*4)+2].y = (float) fscale * CurY;
+		 texlst[(0*4)+2].r = color[0];
+		 texlst[(0*4)+2].g = color[1];
+		 texlst[(0*4)+2].b = color[2];
+		 texlst[(0*4)+2].a = color[3];
 
 		 //0,0 Texture Coord
-		 texlst[(i*4)+3].texx = adv*f->x;
-		 texlst[(i*4)+3].texy = (float) 1.0 -(adv*f->y);
-         texlst[(i*4)+3].x = (float) fscale * CurX;
-		 texlst[(i*4)+3].y = (float) fscale * CurY;
-		 texlst[(i*4)+3].r = color[0];
-		 texlst[(i*4)+3].g = color[1];
-		 texlst[(i*4)+3].b = color[2];
-		 texlst[(i*4)+3].a = color[3];
+		 texlst[(0*4)+3].texx = adv*f->x;
+		 texlst[(0*4)+3].texy = (float) 1.0 -(adv*f->y);
+         texlst[(0*4)+3].x = (float) fscale * CurX;
+		 texlst[(0*4)+3].y = (float) fscale * CurY;
+		 texlst[(0*4)+3].r = color[0];
+		 texlst[(0*4)+3].g = color[1];
+		 texlst[(0*4)+3].b = color[2];
+		 texlst[(0*4)+3].a = color[3];
 
          //Only check kerning if there is greater then 1 character and 
 		 //if the check character is 1 less then the end of the string.
@@ -489,10 +488,11 @@ void BMFont::Print(float x, float y, const char *fmt, ...)
 		 { 
 			 x += GetKerningPair(text[i],text[i+1]);
 		 }
+
+		 Render_String(1);
 		  
 		 x +=  f->XAdvance;
     }
-   Render_String((int)strlen(text));
 }
 
 

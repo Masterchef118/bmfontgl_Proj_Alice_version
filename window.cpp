@@ -185,7 +185,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	  Snap.PrintCenter(320, "Centered printing: To Ti");*/
 
 	  vic_22_bl.SetColor(250, 251, 252, 255);
-	  vic_22_bl.PrintCenter(280, "Factories, Foreign Investment, Production, Projects");
+	  vic_22_bl.Print(280, 280, "Factories, Foreign Investment, Production, Projects");
 	
 	  GlSwap();
      }
